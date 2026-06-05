@@ -1,0 +1,122 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Development folders
+old/
+temp/
+tmp/
+
+# IDE specific files
+.vscode/
+.idea/
+.cursor/
+.claude/
+*.swp
+*.swo
+.DS_Store
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.*
+.env.local
+!.env.example
+!tests/.env.example
+.envrc
+.npmrc
+.pypirc
+.netrc
+
+# Secret/key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.kdbx
+*.ovpn
+credentials.json
+secrets.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# pytest
+.pytest_cache/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm    # SQLite shared memory file
+*.db-wal    # SQLite write-ahead log file
+*.sqlite-shm
+*.sqlite3-shm
+*.sqlite-wal
+*.sqlite3-wal
+
+# test files
+dynamic_result.csv
+
+# AutoGluon
+AutoGluonModels/
+AutogluonModels/
+
+# Generated data and reports
+artifacts/
+data/**
+!data/
+!data/raw/
+!data/raw/ufcstats/
+!data/raw/ufcstats/competitions.csv
+!data/raw/ufcstats/individuals.csv
+pics/
+visualizations/
+blogs/
+queries/
+experiments/
+walk_forward_test_run/
+*.csv
+*.html
+!libs/web/static/index.html
+*.ipynb
+*data.csv
+!data/
+!data/raw/
+!data/raw/ufcstats/
+!data/raw/ufcstats/competitions.csv
+!data/raw/ufcstats/individuals.csv
+notes.txt
+odds_last_scrape.txt
+README_OPTIMIZATION.md
+
+# Backups and model artifacts
+backups/
+OptimizedModels/

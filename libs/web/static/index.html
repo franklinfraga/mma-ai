@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MMA AI</title>
+    <link rel="stylesheet" href="/static/styles.css?v=analytics-ask-20260605" />
+    <script src="/vendor/plotly.min.js"></script>
+    <script src="/static/icons.js?v=analytics-ask-20260605"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>MMA AI</h1>
+        <p id="status-line">Loading workspace status</p>
+      </div>
+      <div class="top-actions">
+        <span id="readiness-badge" class="readiness-badge checking" aria-live="polite">Checking readiness</span>
+        <button id="refresh-status" class="icon-button" title="Refresh status" aria-label="Refresh status">
+          <i data-lucide="refresh-cw"></i>
+        </button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Dashboard tabs">
+      <button class="tab active" data-tab="data"><i data-lucide="database"></i><span>Data</span></button>
+      <button class="tab" data-tab="predict"><i data-lucide="target"></i><span>Predict</span></button>
+    </nav>
+
+    <main>
+      <section id="data" class="panel active">
+        <div class="grid two">
+          <section class="surface">
+            <div class="section-head">
+              <h2>Data</h2>
+              <button id="run-data" class="primary"><i data-lucide="play"></i><span>Update Data</span></button>
+            </div>
+            <div class="metrics" id="data-metrics"></div>
+            <div id="data-output" class="result">No data pipeline jobs yet.</div>
+            <details open>
+              <summary>Debug Log</summary>
+              <pre id="data-log" class="debug-log">No data logs yet.</pre>
+            </details>
+          </section>
+
+          <section class="surface">
+            <div class="section-head">
+              <h2>Analytics</h2>
+              <div class="section-actions">
+                <button id="copy-analytics-system-prompt" class="secondary" title="Copy the full MMA analytics system prompt for coding agents">
+                  <i data-lucide="copy"></i><span>Copy Analytics Agent System Prompt</span>
+                </button>
+                <button id="run-analytics" class="primary"><i data-lucide="sparkles"></i><span>Ask</span></button>
+              </div>
+            </div>
+            <p id="analytics-status" class="field-note analytics-status">Checking analytics setup...</p>
+            <p id="analytics-copy-status" class="field-note copy-status" aria-live="polite"></p>
+            <textarea id="analytics-question" rows="4" placeholder="Which features changed most over the last five UFC events?"></textarea>
+            <textarea id="analytics-sql" rows="4" placeholder="Optional read-only SQL"></textarea>
+            <details>
+              <summary>Analytics Options</summary>
+              <div class="form-grid">
+                <label>Maximum Rows
+                  <input id="analytics-max-rows" type="number" min="1" max="1000" value="100" />
+                </label>
+              </div>
+            </details>
+            <div id="analytics-output" class="result analytics-report" aria-live="polite"></div>
+            <div id="analytics-chart" class="chart analytics-chart-grid"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="predict" class="panel">
+        <section class="surface predict-settings">
+          <div class="section-head">
+            <h2>Prediction Settings</h2>
+          </div>
+          <div class="form-grid">
+            <label class="span-two">Model <select id="predict-model"></select></label>
+            <div class="checkbox-field">
+              <label><input id="predict-odds" type="checkbox" /> Odds</label>
+              <p class="field-note">These live prediction odds are not passed into the model; they solely exist to calculate the Expected Value of each prediction.</p>
+            </div>
+            <div class="checkbox-field">
+              <label><input id="predict-shap" type="checkbox" /> Include SHAP</label>
+              <p class="field-note">Creates per-feature reasoning for why a fighter was picked, but takes a long time to run.</p>
+            </div>
+            <p id="predict-model-status" class="field-note model-status span-two">Checking available models...</p>
+          </div>
+          <details>
+            <summary>Advanced Prediction Knobs</summary>
+            <div class="form-grid">
+              <label>Target
+                <select id="predict-model-type">
+                  <option value="win">Win</option>
+                  <option value="decision">Decision</option>
+                </select>
+              </label>
+              <label class="span-two">Prediction Data CSV
+                <input id="predict-data-csv" placeholder="Default data/prediction_data.csv" />
+              </label>
+              <label class="span-two">Training Data CSV
+                <input id="predict-training-csv" placeholder="Default data/training_data.csv" />
+              </label>
+              <label class="span-two">Output Directory
+                <input id="predict-output-dir" placeholder="Default predictions/latest or predictions/manual" />
+              </label>
+              <label><input id="predict-calibrated" type="checkbox" /> Calibrated probabilities</label>
+              <div class="checkbox-field span-two">
+                <label><input id="predict-flaresolverr" type="checkbox" /> Use Flaresolverr proxy</label>
+                <p class="field-note">Use this only when BestFightOdds is blocking odds scraping.</p>
+              </div>
+            </div>
+          </details>
+        </section>
+        <div class="grid two">
+          <section class="surface">
+            <div class="section-head">
+              <h2>Upcoming Event</h2>
+              <button id="load-events" class="secondary"><i data-lucide="calendar-search"></i><span>Refresh</span></button>
+            </div>
+            <div class="form-grid">
+              <label class="span-two">Upcoming UFC Event
+                <select id="predict-event">
+                  <option value="">Loading upcoming events...</option>
+                </select>
+              </label>
+            </div>
+            <div id="event-preview" class="event-preview">Upcoming events load automatically.</div>
+            <details>
+              <summary>Manual Event Odds</summary>
+              <p class="field-note">These live event odds are not passed into the model. They are only used to calculate market-implied probability and expected value.</p>
+              <textarea id="event-manual-odds" rows="5" placeholder="fighter name=-150&#10;other fighter=+200"></textarea>
+            </details>
+            <button id="run-event-predict" class="primary wide" disabled><i data-lucide="badge-dollar-sign"></i><span>Predict Event</span></button>
+            <details open>
+              <summary>Output Log</summary>
+              <pre id="events-log" class="debug-log">No event prediction logs yet.</pre>
+            </details>
+            <div id="events-output" class="prediction-output"></div>
+          </section>
+
+          <section class="surface">
+            <div class="section-head">
+              <h2>Manual Matchup</h2>
+              <button id="load-fighters" class="secondary"><i data-lucide="users"></i><span>Load</span></button>
+            </div>
+            <div class="form-grid">
+              <label>Fighter 1 <input id="fighter1" list="fighters-list" /></label>
+              <label>Fighter 2 <input id="fighter2" list="fighters-list" /></label>
+              <label>Fight Date <input id="fight-date" type="date" /></label>
+            </div>
+            <datalist id="fighters-list"></datalist>
+            <button id="run-matchup" class="primary wide" disabled><i data-lucide="swords"></i><span>Predict Matchup</span></button>
+            <details open>
+              <summary>Output Log</summary>
+              <pre id="prediction-log" class="debug-log">No matchup prediction logs yet.</pre>
+            </details>
+            <div id="prediction-output" class="prediction-output"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer id="job-strip"></footer>
+    <script src="/static/app.js?v=analytics-ask-20260605"></script>
+  </body>
+</html>

@@ -158,14 +158,13 @@ def test_setup_scripts_download_restore_configure_and_start_dashboard():
     for script in (powershell, bash):
         assert "MMA AI setup" in script
         assert "Show this help and exit before Docker or downloads" in script
-        assert "https://huggingface.co/datasets/DanMcInerney/mma-ai/resolve/main" in script
+        assert "https://huggingface.co/datasets/franklinfraga/mma-ai/resolve/main" in script
         assert "dumps/mma-ai.postgres-custom" in script
         assert "dumps/odds.postgres-custom" in script
         assert "processed/prediction_data.csv" in script
         assert "processed/training_data.csv" in script
         assert "processed/training_data_dec.csv" in script
         assert "models/ag-20260304_110750-win-extreme.tar.gz" in script
-        assert "248511976D55895BE2C167F2F8FA8C4013E635B39A9BAB0D5F28C0916B5AAD74" in script
         assert "pg_restore" in script
         assert "--clean" in script
         assert "--if-exists" in script

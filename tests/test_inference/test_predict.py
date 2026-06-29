@@ -31,6 +31,7 @@ from predict import (
     maybe_take_screenshots,
     parse_manual_odds_json,
     apply_manual_odds,
+    _select_prediction_model,
 )
 from libs.bfo_scraper import BFOScraper
 
@@ -1138,6 +1139,19 @@ def test_latest_model_path_reports_configured_models_dir_when_missing(monkeypatc
 
     with pytest.raises(FileNotFoundError, match="empty-models"):
         latest_model_path("win")
+
+
+def test_select_prediction_model_prefers_lightweight_backends():
+    class DummyModel:
+        def model_names(self):
+            return ["LightGBM_r73", "CatBoost_c1", "WeightedEnsemble_L2"]
+
+    dummy = DummyModel()
+
+    assert _select_prediction_model(dummy, "lightgbm") == "LightGBM_r73"
+    assert _select_prediction_model(dummy, "catboost") == "CatBoost_c1"
+    assert _select_prediction_model(dummy, "weighted") == "WeightedEnsemble_L2"
+    assert _select_prediction_model(dummy, "auto") is None
 
 
 if __name__ == "__main__":

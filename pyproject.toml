@@ -7,21 +7,19 @@ dependencies = [
     # --- Core ---
     "pandas>=1.5.0",
     "numpy>=1.23.0",
-    
     # --- Database ---
     "sqlalchemy>=2.0.0",
     "sqlalchemy-utils>=0.38.0",
     "psycopg2-binary>=2.9.5",
-    
     # --- Machine Learning (AutoGluon is installed manually later) ---
     "scikit-learn>=1.3.0",
     "joblib>=1.3.0",
     "catboost>=1.2.8",
     "lightgbm>=4.6.0",
     "xgboost>=2.1.4",
-    "torch>=2.5.1",  # This will pull the Nightly CUDA 13 version
+    "torch==2.9.1+rocm6.3",
+    "pytorch-triton-rocm",
     "omegaconf>=2.3.0",
-    
     # --- Web & Scraping ---
     "requests>=2.28.0",
     "beautifulsoup4>=4.11.0",
@@ -30,13 +28,11 @@ dependencies = [
     "scrapy>=2.13.0",
     "selenium>=4.15.0",
     "webdriver-manager>=4.0.0",
-    
     # --- Visualization ---
     "matplotlib>=3.6.0",
     "seaborn>=0.12.0",
     "plotly>=5.17.0",
     "kaleido==0.2.1",
-    
     # --- Utilities ---
     "fuzzywuzzy>=0.18.0",
     "unidecode>=1.3.0",
@@ -53,6 +49,7 @@ dependencies = [
     "google-generativeai>=0.8.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
+    "numba>=0.60.0",
 ]
 
 [project.optional-dependencies]
@@ -83,6 +80,15 @@ include = ["config*", "libs*", "scripts*"]
 "libs.web" = ["static/*"]
 
 # --- COMMANDS ---
+
+[[tool.uv.index]]
+name = "pytorch-rocm"
+url = "https://download.pytorch.org/whl/rocm6.3"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-rocm" }
+pytorch-triton-rocm = { index = "pytorch-rocm" }
 
 [project.scripts]
 mma-scrape-ufcstats = "scripts.scrape_ufcstats:main"

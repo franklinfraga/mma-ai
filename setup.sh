@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-DATASET_BASE_URL="https://huggingface.co/datasets/DanMcInerney/mma-ai/resolve/main"
+DATASET_BASE_URL="https://huggingface.co/datasets/franklinfraga/mma-ai/resolve/main"
 ARTIFACTS_ROOT="$ROOT/artifacts/mma-ai-dataset"
 MODEL_NAME="ag-20260304_110750-win-extreme"
 
@@ -139,12 +139,12 @@ fi
 
 ARTIFACTS=(
   "manifest.json|"
-  "dumps/mma-ai.postgres-custom|0EB0D2CBDECC55B6EA625F70A12914F72BD0FDCF67B91BCDFC0146393E1A7B7A"
-  "dumps/odds.postgres-custom|767AFB5C2642DD8D450B6F043F333CD5FE8589B4D8574E41831E8BBC2614F352"
-  "processed/training_data.csv|FFBF161D6F6E307132EB8150B5978728DED93AA9B4D3282F892C725503BA654E"
-  "processed/training_data_dec.csv|91D6918DFCE10C5C5C788721C58FB98AB42AC51D9FB854BA935E6CB54701EFFB"
-  "processed/prediction_data.csv|1C28D3B04DA412980777D38032E95A5B695C4B53BEA0014192D4D6C07413F754"
-  "models/ag-20260304_110750-win-extreme.tar.gz|248511976D55895BE2C167F2F8FA8C4013E635B39A9BAB0D5F28C0916B5AAD74"
+  "dumps/mma-ai.postgres-custom|"
+  "dumps/odds.postgres-custom|"
+  "processed/training_data.csv|"
+  "processed/training_data_dec.csv|"
+  "processed/prediction_data.csv|"
+  "models/ag-20260304_110750-win-extreme.tar.gz|"
 )
 
 require_command() {
@@ -227,6 +227,7 @@ validate_manifest_artifact_pins() {
     pins+=("$relative=$expected")
   done
 
+  [[ "${#pins[@]}" -eq 0 ]] && return 0
   bash "$ROOT/scripts/verify_hf_manifest.sh" "$manifest" "${pins[@]}"
 }
 

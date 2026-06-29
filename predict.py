@@ -1049,7 +1049,11 @@ def get_predictions(model, calibrator, scaled_X_df, use_calibrated=None):
     # Get original predictions - handle models trained with sample_weight
     try:
         with pathlib_pickle_compatibility():
-            y_pred_proba = model.predict_proba(scaled_X_df)
+            prediction_model = getattr(model, "_prediction_model_name", None)
+            if prediction_model:
+                y_pred_proba = model.predict_proba(scaled_X_df, model=prediction_model)
+            else:
+                y_pred_proba = model.predict_proba(scaled_X_df)
     except KeyError as e:
         if 'sample_weight' in str(e):
             scaled_X_df_with_weights = scaled_X_df.copy()
@@ -1057,6 +1061,11 @@ def get_predictions(model, calibrator, scaled_X_df, use_calibrated=None):
             with pathlib_pickle_compatibility():
                 y_pred_proba = model.predict_proba(scaled_X_df_with_weights)
             print(f"Added sample_weight column for prediction (model was trained with recency weights)")
+        else:
+            raise e
+    except Exception as e:
+        if _is_gpu_oom_error(e):
+            y_pred_proba = _predict_proba_with_lightweight_fallback(model, scaled_X_df)
         else:
             raise e
 
@@ -1100,6 +1109,97 @@ def get_predictions(model, calibrator, scaled_X_df, use_calibrated=None):
                 print(f"Warning: Could not generate calibrated predictions (fallback failed): {e2}. Using original predictions.")
 
     return y_pred_df
+
+
+def _is_gpu_oom_error(exc):
+    message = str(exc).lower()
+    return "outofmemoryerror" in exc.__class__.__name__.lower() or "out of memory" in message
+
+
+def _predict_proba_with_lightweight_fallback(model, scaled_X_df):
+    preferred_models = [
+        "LightGBM_r73",
+        "LightGBM_r73_FULL",
+        "CatBoost_c1",
+        "CatBoost_c1_FULL",
+        "LightGBMPrep_r13",
+        "LightGBMPrep_r13_FULL",
+        "LightGBMPrep_r21",
+        "LightGBMPrep_r21_FULL",
+        "LightGBMPrep_r31",
+        "LightGBMPrep_r31_FULL",
+        "LightGBMPrep_r41",
+        "LightGBMPrep_r41_FULL",
+        "WeightedEnsemble_L2",
+        "WeightedEnsemble_L2_FULL",
+    ]
+
+    available_models = []
+    try:
+        available_models = list(model.model_names())
+    except Exception:
+        try:
+            available_models = list(model._trainer.model_graph.nodes)
+        except Exception:
+            available_models = []
+
+    tried = []
+    for model_name in preferred_models:
+        if available_models and model_name not in available_models:
+            continue
+        tried.append(model_name)
+        try:
+            print(f"[warn] GPU OOM in ensemble path; retrying with lighter model: {model_name}")
+            with pathlib_pickle_compatibility():
+                return model.predict_proba(scaled_X_df, model=model_name)
+        except Exception as exc:
+            if _is_gpu_oom_error(exc):
+                continue
+            raise
+
+    if tried:
+        raise RuntimeError(
+            "Prediction failed after GPU OOM fallback attempts for models: "
+            + ", ".join(tried)
+        )
+    raise RuntimeError("Prediction failed after GPU OOM, but no fallback models were available.")
+
+
+def _select_prediction_model(model, selection):
+    if selection in (None, "auto", "ensemble"):
+        return None
+
+    preferred = {
+        "lightgbm": [
+            "LightGBM_r73",
+            "LightGBM_r73_FULL",
+            "LightGBMPrep_r13",
+            "LightGBMPrep_r13_FULL",
+            "LightGBMPrep_r21",
+            "LightGBMPrep_r21_FULL",
+            "LightGBMPrep_r31",
+            "LightGBMPrep_r31_FULL",
+            "LightGBMPrep_r41",
+            "LightGBMPrep_r41_FULL",
+        ],
+        "catboost": ["CatBoost_c1", "CatBoost_c1_FULL"],
+        "weighted": ["WeightedEnsemble_L2", "WeightedEnsemble_L2_FULL"],
+    }.get(selection, [])
+
+    available_models = []
+    try:
+        available_models = list(model.model_names())
+    except Exception:
+        try:
+            available_models = list(model._trainer.model_graph.nodes)
+        except Exception:
+            available_models = []
+
+    for candidate in preferred:
+        if not available_models or candidate in available_models:
+            return candidate
+
+    return None
 
 def load_model(model_name):
     """Load an AutoGluon model from the specified path (deprecated - use load_model_and_calibrator)"""
@@ -1312,6 +1412,12 @@ def parse_args():
     parser.add_argument("--flaresolverr", action="store_true", help="Use FlareSolverr for BestFightOdds requests when BFO is blocking normal scraping.")
     parser.add_argument("--no-manual-odds", action="store_true", help="Do not prompt for missing odds; use N/A instead.")
     parser.add_argument("--no-shap", action="store_true", help="Skip SHAP visualizations.")
+    parser.add_argument(
+        "--prediction-model",
+        default="auto",
+        choices=["auto", "ensemble", "lightgbm", "catboost", "weighted"],
+        help="Prediction backend to use when multiple AutoGluon models are available.",
+    )
     parser.add_argument("--use-calibrated", action="store_true", help="Use calibrated predictions when calibrator.pkl exists.")
     parser.add_argument("--output-dir", default=None, help="Directory for prediction images and CSVs.")
     parser.add_argument("--screenshots", action="store_true", help="Create PNG screenshots from generated HTML visualizations when Chrome is available.")
@@ -1374,6 +1480,10 @@ def cli():
     #feats = LAYERED_TEST_FEATS
     
     model, calibrator = load_model_and_calibrator(model_path, use_calibrated)
+    prediction_model = _select_prediction_model(model, args.prediction_model)
+    if prediction_model:
+        setattr(model, "_prediction_model_name", prediction_model)
+        print(f"[prediction] Using model override: {prediction_model}")
     
     # Check if this is an EnsemblePredictor (walkforward model)
     from libs.modeling.train import EnsemblePredictor

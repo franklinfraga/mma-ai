@@ -25,7 +25,7 @@ users.
 
 For a first-time local install with predictions ready, run the bootstrap script.
 It downloads database dumps, processed prediction/training CSVs, and the starter
-AutoGluon model from `https://huggingface.co/datasets/DanMcInerney/mma-ai`,
+AutoGluon model from `https://huggingface.co/datasets/franklinfraga/mma-ai`,
 imports the dumps into Docker Postgres, optionally configures an analytics LLM,
 starts the dashboard, and opens it in your browser.
 
@@ -1172,7 +1172,7 @@ CLI entrypoints outside Docker.
    ```bash
    git lfs install
    mkdir -p artifacts
-   git clone https://huggingface.co/datasets/DanMcInerney/mma-ai artifacts/mma-ai-dataset
+    git clone https://huggingface.co/datasets/franklinfraga/mma-ai artifacts/mma-ai-dataset
    ```
 
    PowerShell equivalent:
@@ -1180,7 +1180,7 @@ CLI entrypoints outside Docker.
    ```powershell
    git lfs install
    New-Item -ItemType Directory -Force artifacts | Out-Null
-   git clone https://huggingface.co/datasets/DanMcInerney/mma-ai artifacts/mma-ai-dataset
+   git clone https://huggingface.co/datasets/franklinfraga/mma-ai artifacts/mma-ai-dataset
    ```
 
    Restore the two PostgreSQL databases:

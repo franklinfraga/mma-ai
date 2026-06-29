@@ -1,6 +1,6 @@
 # Hugging Face Dataset Artifacts
 
-Dataset URL: `https://huggingface.co/datasets/DanMcInerney/mma-ai`
+Dataset URL: `https://huggingface.co/datasets/franklinfraga/mma-ai`
 
 This repo tracks only the small raw UFCStats seed CSVs needed to update from
 source: `data/raw/ufcstats/competitions.csv` and
@@ -68,7 +68,7 @@ Download the dataset artifacts:
 ```bash
 git lfs install
 mkdir -p artifacts
-git clone https://huggingface.co/datasets/DanMcInerney/mma-ai artifacts/mma-ai-dataset
+git clone https://huggingface.co/datasets/franklinfraga/mma-ai artifacts/mma-ai-dataset
 ```
 
 PowerShell:
@@ -76,7 +76,7 @@ PowerShell:
 ```powershell
 git lfs install
 New-Item -ItemType Directory -Force artifacts | Out-Null
-git clone https://huggingface.co/datasets/DanMcInerney/mma-ai artifacts/mma-ai-dataset
+git clone https://huggingface.co/datasets/franklinfraga/mma-ai artifacts/mma-ai-dataset
 ```
 
 From the code repo root, restore the databases:
